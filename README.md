@@ -78,11 +78,11 @@ base de datos.
 
 1. Clonar el repositorio
    ```bash
-   git clone https://github.com/usuario/nexovet.git
+   git clone https://github.com/roangelelli/nexovet.git
    cd nexovet
    ```
 2. Instalar dependencias en `frontend/` y `backend/`.
-3. Configurar las variables de entorno (archivo `.env`, **nunca se sube al repositorio**).
+3. Configurar las variables de entorno.
 4. Levantar el backend y el frontend.
 
 ---
