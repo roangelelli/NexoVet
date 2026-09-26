@@ -67,7 +67,7 @@ Aportan valor, pero el sistema funciona sin ellos. Se desarrollan una vez
 terminado el núcleo y son los primeros candidatos a recortar ante falta de
 tiempo:
 
-- **Vacunas:** listado por mascota con fechas de aplicación y renovación.
+- **Vacunas:** listado por mascota con fecha de aplicación y próxima fecha calculada.
 - **Imágenes en la historia clínica:** adjuntar fotos o radiografías a cada atención.
 - **Reportes básicos:** consultas de apoyo, como los turnos del día.
 
@@ -106,7 +106,7 @@ sesión; "—" indica que el rol no tiene acceso a ese módulo.
 | Reportes | Ver | Ver | — |
 | Personal | Solo lectura | Solo lectura | — |
 
-> Las cuentas del personal se cargan manualmente en esta etapa. Las contraseñas se almacenan cifradas (hash), nunca en texto plano.
+> Las cuentas del personal se cargan manualmente en esta etapa. Las contraseñas se almacenan como hash (bcrypt), nunca en texto plano.
 
 ---
 
@@ -117,34 +117,63 @@ sesión; "—" indica que el rol no tiene acceso a ese módulo.
 - **Disponibilidad configurable:** el personal define los horarios y el sistema genera las franjas de turno automáticamente.
 - **Gestión de turnos:** ciclo de vida completo (solicitado → confirmado → atendido / cancelado).
 - **Historia clínica:** registro de cada atención, con imágenes adjuntas.
-- **Vacunas:** listado por mascota con tipo, fecha de aplicación, fecha de renovación, veterinario y observaciones (el estado se calcula según las fechas).
+- **Vacunas:** listado por mascota con tipo, fecha de aplicación, veterinario y observaciones. La próxima fecha se calcula según el intervalo definido en el tipo de vacuna, y el estado se deriva de esa fecha.
 - **Reportes:** consultas de apoyo a la gestión diaria.
+
+---
+
+## Arquitectura
+
+NexoVet utiliza una arquitectura **cliente-servidor de tres capas**:
+
+- **Presentación:** una aplicación de página única (SPA) en React que corre en el navegador y se adapta a escritorio y celular.
+- **Lógica de negocio:** una API REST en Node.js + Express que concentra las reglas del sistema y es el único componente que accede a los datos.
+- **Datos:** una base de datos relacional MySQL.
+
+Las imágenes de la historia clínica se alojan en un servicio externo (Cloudinary);
+en la base solo se guarda la URL. El backend se organiza internamente en capas
+(rutas, controladores, servicios, acceso a datos y middlewares).
+
+El detalle completo está en el documento de arquitectura (ver [Documentación](#documentación)).
 
 ---
 
 ## Tecnologías
 
 - **Lenguaje principal:** JavaScript
-- **Frontend:** React
-- **Backend:** Node.js + Express
-- **Base de datos:** MySQL *(a confirmar)*
-- **Almacenamiento de imágenes:** *a confirmar*
-- **Despliegue:** *a confirmar*
+- **Frontend:** React (desplegado en Vercel)
+- **Backend:** Node.js + Express (desplegado en Render)
+- **Base de datos:** MySQL (Aiven)
+- **Almacenamiento de imágenes:** Cloudinary
+- **Autenticación:** JWT (JSON Web Tokens)
+- **Hash de contraseñas:** bcrypt
 - **Control de versiones:** Git + GitHub
 
 ---
 
 ## Estructura del repositorio
 
-```
+```text
 NexoVet/
-├── README.md          Documentación del proyecto
+├── README.md
 ├── .gitignore
-├── frontend/          Código de la interfaz (React)
-├── backend/           Código de la API (Node.js + Express)
-├── database/          Scripts SQL, esquema y migraciones
-└── docs/              Informes, propuesta y esquemas de avance
+├── frontend/            Aplicación React (SPA)
+├── backend/             API REST (Node.js + Express)
+├── database/            Scripts SQL
+└── docs/                Documentación de diseño
 ```
+
+---
+
+## Documentación
+
+La documentación de diseño de esta etapa se encuentra en `docs/` y los scripts en `database/`:
+
+- [Diseño de la base de datos](<docs/Diseño BD - NexoVet.pdf>) — diccionario de datos y convenciones.
+- [Diagrama entidad-relación](docs/diagrama-er.jpg)
+- [Arquitectura del proyecto](docs/Arquitectura_NexoVet.pdf)
+- [Listado de módulos](<docs/Listado de modulos - NexoVet.pdf>)
+- Scripts de base de datos: [`database/01_schema.sql`](database/01_schema.sql) y [`database/02_datos_iniciales.sql`](database/02_datos_iniciales.sql)
 
 ---
 
@@ -163,5 +192,5 @@ base de datos.
    cd NexoVet
    ```
 2. Instalar dependencias en `frontend/` y `backend/`.
-3. Configurar las variables de entorno.
+3. Configurar las variables de entorno (archivo `.env`): credenciales de la base de datos (Aiven), claves de Cloudinary y el secreto de JWT. El archivo `.env` **nunca se sube al repositorio**.
 4. Levantar el backend y el frontend.
