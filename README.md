@@ -167,13 +167,13 @@ NexoVet/
 
 ## Documentación
 
-La documentación de diseño de esta etapa se encuentra en `docs/` y los scripts en `database/`:
+La documentación de diseño de esta etapa se encuentra en `docs/`:
 
-- [Diseño de la base de datos](<docs/Diseño BD - NexoVet.pdf>) — diccionario de datos y convenciones.
-- [Diagrama entidad-relación](docs/diagrama-er.jpg)
-- [Arquitectura del proyecto](docs/Arquitectura_NexoVet.pdf)
-- [Listado de módulos](<docs/Listado de modulos - NexoVet.pdf>)
-- Scripts de base de datos: [`database/01_schema.sql`](database/01_schema.sql) y [`database/02_datos_iniciales.sql`](database/02_datos_iniciales.sql)
+- [Propuesta de proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Propuesta%20NexoVet%20-%20ANGELELLI%20-%20SCHNEIDER.pdf)
+- [Diseño de la base de datos](https://github.com/roangelelli/NexoVet/blob/main/docs/Disen%CC%83o%20BD%20-%20NexoVet.pdf)
+- [Diagrama entidad-relación](https://github.com/roangelelli/NexoVet/blob/main/docs/diagrama-er.jpg.jpeg)
+- [Arquitectura del proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Arquitectura_NexoVet.pdf)
+- [Listado de módulos](https://github.com/roangelelli/NexoVet/blob/main/docs/Listado%20de%20modulos%20-%20NexoVet.pdf)
 
 ---
 
