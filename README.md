@@ -23,7 +23,6 @@ API: el **personal de la veterinaria** (gestión interna) y el **cliente**
 **Tutora**
 - María Candela Grosso
 
-
 ---
 
 ## Descripción
@@ -43,16 +42,16 @@ de quien inicia sesión.
 
 ## Alcance y MVP
 
-El **MVP**  es el conjunto de funcionalidades indispensables para cumplir el objetivo de punta a punta: que la veterinaria
+El **MVP** es el conjunto de funcionalidades indispensables para cumplir el objetivo de punta a punta: que la veterinaria
 digitalice su gestión y que el cliente pueda autogestionarse. Los módulos se
-priorizan en tres niveles, de modo que si por algun contratiempo no se llega a desarrollar la totalidad del proyecto se sabe con
+priorizan en tres niveles, de modo que si por algún contratiempo no se llega a desarrollar la totalidad del proyecto se sabe con
 claridad desde dónde recortar sin comprometer el objetivo.
 
 ### Núcleo indispensable
 
-Es el flujo mínimo completo y representa el corazón del sistema, el cual logra el objetivo inicial: 
+Es el flujo mínimo completo y representa el corazón del sistema, el cual logra el objetivo inicial:
 
-1. El personal da de alta clientes y sus mascotas.
+1. El personal da de alta clientes y sus mascotas o el cliente puede auto-registrarse.
 2. El personal configura la **disponibilidad** (días, franjas horarias y duración del turno).
 3. El **cliente** solicita un turno eligiendo una de las franjas libres que el sistema calcula automáticamente.
 4. **Recepción** confirma el turno.
@@ -76,8 +75,7 @@ tiempo:
 Se excluyen deliberadamente de esta versión para garantizar la viabilidad: pagos en línea, notificaciones y recordatorios automáticos,
 reprogramación automática de turnos, mensajería o chat interno, asistentes con
 inteligencia artificial, integración con controladores fiscales, disponibilidad
-por profesional, gestión de cuentas del personal desde la app y aplicación móvil
-nativa.
+por profesional, gestión de cuentas del personal desde la app y aplicación móvil nativa.
 
 ---
 
@@ -115,7 +113,9 @@ sesión; "—" indica que el rol no tiene acceso a ese módulo.
 - **Autenticación y roles:** acceso diferenciado para Recepción, Veterinario y Cliente.
 - **Clientes y mascotas:** un cliente puede registrar y seleccionar varias mascotas.
 - **Disponibilidad configurable:** el personal define los horarios y el sistema genera las franjas de turno automáticamente.
-- **Gestión de turnos:** ciclo de vida completo (solicitado → confirmado → atendido / cancelado).
+- **Gestión de turnos:** ciclo de vida completo (solicitado → confirmado → atendido / cancelado), con una franja = un turno.
+> La agenda del MVP es **general para la veterinaria**: el cliente no selecciona un
+veterinario al solicitar un turno. El profesional que realiza la atención se registra posteriormente en la historia clínica. 
 - **Historia clínica:** registro de cada atención, con imágenes adjuntas.
 - **Vacunas:** listado por mascota con tipo, fecha de aplicación, veterinario y observaciones. La próxima fecha se calcula según el intervalo definido en el tipo de vacuna, y el estado se deriva de esa fecha.
 - **Reportes:** consultas de apoyo a la gestión diaria.
@@ -134,7 +134,11 @@ Las imágenes de la historia clínica se alojan en un servicio externo (Cloudina
 en la base solo se guarda la URL. El backend se organiza internamente en capas
 (rutas, controladores, servicios, acceso a datos y middlewares).
 
-El detalle completo está en el documento de arquitectura (ver [Documentación](#documentación)).
+La agenda es general (el turno no reserva veterinario) y la doble reserva de una
+franja se previene con validación en el backend más una restricción única en la
+base de datos.
+
+El detalle completo está en el documento de arquitectura (ver [Documentación](https://github.com/roangelelli/NexoVet/tree/main/docs)).
 
 ---
 
@@ -149,17 +153,27 @@ El detalle completo está en el documento de arquitectura (ver [Documentación](
 - **Hash de contraseñas:** bcrypt
 - **Control de versiones:** Git + GitHub
 
+**Despliegue:** frontend en Vercel, backend en Render, base de datos MySQL en Aiven e
+imágenes en Cloudinary, publicados automáticamente desde la rama `main` de este repositorio.
+
+| Componente | Servicio | Qué aloja |
+|------------|----------|-----------|
+| **Frontend (React)** | Vercel | Aplicación web (SPA) servida al navegador del cliente y del personal. |
+| **Backend (API REST)** | Render | API Node.js + Express con toda la lógica de negocio. |
+| **Base de datos** | Aiven (MySQL) | Datos del sistema (usuarios, mascotas, turnos, historia clínica, etc.). |
+| **Imágenes** | Cloudinary | Archivos de las imágenes de la historia clínica (en la base solo se guarda la URL). |
+
 ---
 
 ## Estructura del repositorio
 
-```text
+```
 NexoVet/
 ├── README.md
 ├── .gitignore
 ├── frontend/            Aplicación React (SPA)
 ├── backend/             API REST (Node.js + Express)
-├── database/            Scripts SQL
+├── database/            Base de datos (esquema y scripts, en la etapa de desarrollo)
 └── docs/                Documentación de diseño
 ```
 
@@ -167,11 +181,11 @@ NexoVet/
 
 ## Documentación
 
-La documentación de diseño de esta etapa se encuentra en `docs/`:
+La documentación de diseño se encuentra en la carpeta `docs/`:
 
 - [Propuesta de proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Propuesta%20NexoVet%20-%20ANGELELLI%20-%20SCHNEIDER.pdf)
-- [Diseño de la base de datos](https://github.com/roangelelli/NexoVet/blob/main/docs/Disen%CC%83o%20BD%20-%20NexoVet.pdf)
-- [Diagrama entidad-relación](https://github.com/roangelelli/NexoVet/blob/main/docs/diagrama-er.jpg.jpeg)
+- [Diseño de la base de datos](https://github.com/roangelelli/NexoVet/blob/main/docs/Disen%CC%83o%20BD%20-%20NexoVet.pdf) — diccionario de datos y convenciones.
+- [Diagrama entidad-relación](https://github.com/roangelelli/NexoVet/blob/main/docs/diagrama-er.png)
 - [Arquitectura del proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Arquitectura_NexoVet.pdf)
 - [Listado de módulos](https://github.com/roangelelli/NexoVet/blob/main/docs/Listado%20de%20modulos%20-%20NexoVet.pdf)
 
