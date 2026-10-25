@@ -1,23 +1,13 @@
--- ============================================================
 -- NexoVet - Esquema de base de datos (MySQL 8)
--- Basado en docs/3-diseno-base-de-datos.md
--- Es re-ejecutable: borra y recrea las tablas.
--- OJO: en Aiven la base ya viene creada (defaultdb); no hay CREATE DATABASE.
--- ============================================================
-
-SET FOREIGN_KEY_CHECKS = 0;
-DROP TABLE IF EXISTS imagenes, vacunas, atenciones, turnos, mascotas, usuarios,
-                     razas, especies, tipos_vacuna, dias_bloqueados, disponibilidad, configuracion;
-SET FOREIGN_KEY_CHECKS = 1;
 
 -- ---------- Catalogos ----------
-CREATE TABLE especies (
+CREATE TABLE IF NOT EXISTS especies (
   id     INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL,
   UNIQUE KEY uq_especies_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE razas (
+CREATE TABLE IF NOT EXISTS razas (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   especie_id INT NOT NULL,
   nombre     VARCHAR(80) NOT NULL,
@@ -25,7 +15,7 @@ CREATE TABLE razas (
   CONSTRAINT fk_razas_especie FOREIGN KEY (especie_id) REFERENCES especies(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE tipos_vacuna (
+CREATE TABLE IF NOT EXISTS tipos_vacuna (
   id              INT AUTO_INCREMENT PRIMARY KEY,
   nombre          VARCHAR(80) NOT NULL,
   intervalo_meses INT NULL COMMENT 'NULL = dosis unica',
@@ -33,7 +23,7 @@ CREATE TABLE tipos_vacuna (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Usuarios y mascotas ----------
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   nombre        VARCHAR(80)  NOT NULL,
   apellido      VARCHAR(80)  NOT NULL,
@@ -47,7 +37,7 @@ CREATE TABLE usuarios (
   UNIQUE KEY uq_usuarios_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE mascotas (
+CREATE TABLE IF NOT EXISTS mascotas (
   id               INT AUTO_INCREMENT PRIMARY KEY,
   cliente_id       INT NOT NULL,
   nombre           VARCHAR(80) NOT NULL,
@@ -69,12 +59,12 @@ CREATE TABLE mascotas (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Agenda ----------
-CREATE TABLE configuracion (
+CREATE TABLE IF NOT EXISTS configuracion (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
   duracion_turno_min INT NOT NULL DEFAULT 30
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE disponibilidad (
+CREATE TABLE IF NOT EXISTS disponibilidad (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   dia_semana  ENUM('lunes','martes','miercoles','jueves','viernes','sabado','domingo') NOT NULL,
   hora_inicio TIME NOT NULL,
@@ -83,7 +73,7 @@ CREATE TABLE disponibilidad (
   CONSTRAINT ck_disponibilidad_horas CHECK (hora_fin > hora_inicio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE dias_bloqueados (
+CREATE TABLE IF NOT EXISTS dias_bloqueados (
   id     INT AUTO_INCREMENT PRIMARY KEY,
   fecha  DATE NOT NULL,
   motivo VARCHAR(150) NULL,
@@ -94,7 +84,7 @@ CREATE TABLE dias_bloqueados (
 -- franja_activa: fecha+hora mientras el turno NO este cancelado; NULL si esta cancelado.
 -- El UNIQUE sobre esa columna impide dos turnos activos en la misma franja
 -- (ultima barrera contra la doble reserva) y un cancelado libera la franja.
-CREATE TABLE turnos (
+CREATE TABLE IF NOT EXISTS turnos (
   id            INT AUTO_INCREMENT PRIMARY KEY,
   mascota_id    INT NOT NULL,
   fecha         DATE NOT NULL,
@@ -113,7 +103,7 @@ CREATE TABLE turnos (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Historia clinica ----------
-CREATE TABLE atenciones (
+CREATE TABLE IF NOT EXISTS atenciones (
   id             INT AUTO_INCREMENT PRIMARY KEY,
   mascota_id     INT NOT NULL,
   turno_id       INT NULL,
@@ -133,7 +123,7 @@ CREATE TABLE atenciones (
   CONSTRAINT fk_atenciones_veterinario FOREIGN KEY (veterinario_id) REFERENCES usuarios(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE imagenes (
+CREATE TABLE IF NOT EXISTS imagenes (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   atencion_id INT NOT NULL,
   url         VARCHAR(500) NOT NULL COMMENT 'URL en Cloudinary',
@@ -144,7 +134,7 @@ CREATE TABLE imagenes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------- Vacunas ----------
-CREATE TABLE vacunas (
+CREATE TABLE IF NOT EXISTS vacunas (
   id               INT AUTO_INCREMENT PRIMARY KEY,
   mascota_id       INT NOT NULL,
   tipo_vacuna_id   INT NOT NULL,
