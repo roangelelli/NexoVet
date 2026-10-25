@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS mascotas (
   nombre           VARCHAR(80) NOT NULL,
   especie_id       INT NOT NULL,
   raza_id          INT NULL,
+  especie_otra     VARCHAR(80) NULL COMMENT 'Texto libre, solo si la especie es Otro',
   sexo             ENUM('macho','hembra') NOT NULL,
   fecha_nacimiento DATE NULL,
   microchip        VARCHAR(50) NULL,
