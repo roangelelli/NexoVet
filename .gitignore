@@ -144,3 +144,8 @@ vite.config.ts.timestamp-*
 
 #Others
 .DS_Store
+
+# Secretos y certificados: nunca al repositorio
+*.pem
+databaseInfo.*
+secretos/
