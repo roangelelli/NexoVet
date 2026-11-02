@@ -16,6 +16,3 @@ Scripts SQL de NexoVet (MySQL 8).
 mysql -h <HOST> -P <PORT> -u avnadmin -p --ssl-ca=ca.pem --ssl-mode=VERIFY_CA defaultdb < schema.sql
 mysql -h <HOST> -P <PORT> -u avnadmin -p --ssl-ca=ca.pem --ssl-mode=VERIFY_CA defaultdb < seed.sql
 ```
-
-> Las credenciales van en el `.env` del backend, **nunca** en el repo.
-> Antes de la entrega final: borrar/cambiar los usuarios de prueba.
