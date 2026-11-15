@@ -1,0 +1,30 @@
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/figtree";
+@import "tailwindcss";
+
+/* Paleta y tipografías de NexoVet. Se usan como bg-mar, text-tinta, font-display, etc. */
+@theme {
+  --color-tinta: #14272b;
+  --color-mar: #1f5f6b;
+  --color-mar-oscuro: #174a54;
+  --color-bruma: #f2f6f5;
+  --color-arena: #dfe8e6;
+  --color-pomelo: #f0a23b;
+  --color-ok: #2f7d5b;
+  --color-aviso: #a96a10;
+  --color-error: #b3392f;
+
+  --font-display: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Figtree Variable", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-bruma);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-pomelo);
+  outline-offset: 2px;
+}
