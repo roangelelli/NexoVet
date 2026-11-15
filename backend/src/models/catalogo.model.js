@@ -33,4 +33,9 @@ async function buscarRaza(id) {
   return filas[0];
 }
 
-module.exports = { listarEspecies, listarRazas, listarTiposVacuna, buscarEspecie, buscarRaza };
+async function buscarTipoVacuna(id) {
+  const [filas] = await pool.query('SELECT id, nombre, intervalo_meses FROM tipos_vacuna WHERE id = ?', [id]);
+  return filas[0];
+}
+
+module.exports = { listarEspecies, listarRazas, listarTiposVacuna, buscarEspecie, buscarRaza, buscarTipoVacuna };

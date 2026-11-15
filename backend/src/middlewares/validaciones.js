@@ -41,6 +41,13 @@ function ahoraArgentina() {
   return { fecha: texto.slice(0, 10), hora: texto.slice(11, 16) };
 }
 
+// Suma dias a una fecha AAAA-MM-DD y devuelve otra fecha AAAA-MM-DD
+function sumarDias(fecha, dias) {
+  const nueva = new Date(fecha + 'T12:00:00Z');
+  nueva.setUTCDate(nueva.getUTCDate() + dias);
+  return nueva.toISOString().slice(0, 10);
+}
+
 // Datos para dar de alta un cliente (los usa el autorregistro y el alta por el personal)
 function validarNuevoCliente(body = {}) {
   const { nombre, apellido, email, password } = body;
@@ -57,4 +64,4 @@ function validarNuevoCliente(body = {}) {
   textoOpcional(body.telefono, 30, 'El teléfono');
 }
 
-module.exports = { esTexto, textoOpcional, esFecha, esHora, leerId, ahoraArgentina, validarNuevoCliente };
+module.exports = { esTexto, textoOpcional, esFecha, esHora, leerId, ahoraArgentina, sumarDias, validarNuevoCliente };

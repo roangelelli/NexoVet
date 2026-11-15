@@ -8,6 +8,11 @@ const catalogosRoutes = require('./routes/catalogos.routes');
 const clientesRoutes = require('./routes/clientes.routes');
 const mascotasRoutes = require('./routes/mascotas.routes');
 const disponibilidadRoutes = require('./routes/disponibilidad.routes');
+const turnosRoutes = require('./routes/turnos.routes');
+const atencionesRoutes = require('./routes/atenciones.routes');
+const imagenesRoutes = require('./routes/imagenes.routes');
+const vacunasRoutes = require('./routes/vacunas.routes');
+const reportesRoutes = require('./routes/reportes.routes');
 const { manejarErrores } = require('./middlewares/error.middleware');
 
 const app = express();
@@ -22,6 +27,11 @@ app.use('/api/catalogos', catalogosRoutes);
 app.use('/api/clientes', clientesRoutes);
 app.use('/api/mascotas', mascotasRoutes);
 app.use('/api/disponibilidad', disponibilidadRoutes);
+app.use('/api/turnos', turnosRoutes);
+app.use('/api/atenciones', atencionesRoutes);
+app.use('/api/imagenes', imagenesRoutes);
+app.use('/api/vacunas', vacunasRoutes);
+app.use('/api/reportes', reportesRoutes);
 
 app.use((req, res) => res.status(404).json({ error: 'Ruta no encontrada' }));
 app.use(manejarErrores);
