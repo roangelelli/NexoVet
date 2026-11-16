@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const healthRoutes = require('./routes/health.routes');
 const authRoutes = require('./routes/auth.routes');
@@ -17,6 +18,10 @@ const { manejarErrores } = require('./middlewares/error.middleware');
 
 const app = express();
 
+// Render pone un proxy delante: sin esto el límite de intentos vería siempre la misma IP.
+app.set('trust proxy', 1);
+
+app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN }));
 app.use(express.json());
 
