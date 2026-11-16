@@ -93,7 +93,7 @@ export default function ClienteFicha({ propio = false }) {
               <ul className="divide-y divide-arena rounded-xl bg-white">
                 {mascotas.datos.mascotas.map((m) => (
                   <li key={m.id}>
-                    <Link to={`/mascotas/${m.id}`} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 hover:bg-bruma">
+                    <Link to={`/mascotas/${m.id}`} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 hover:bg-arena/60">
                       <span className="font-semibold text-mar">{m.nombre}</span>
                       <span className="text-tinta/70">{m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''} · {edadTexto(m.fecha_nacimiento)}</span>
                     </Link>

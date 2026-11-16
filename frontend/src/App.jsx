@@ -2,15 +2,20 @@ import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import RutaProtegida from './components/RutaProtegida'
 import { EnConstruccion } from './components/ui'
+import AtencionDetalle from './pages/AtencionDetalle'
+import AtencionForm from './pages/AtencionForm'
 import ClienteFicha from './pages/ClienteFicha'
 import ClienteNuevo from './pages/ClienteNuevo'
 import Clientes from './pages/Clientes'
+import Disponibilidad from './pages/Disponibilidad'
 import Inicio from './pages/Inicio'
 import Login from './pages/Login'
 import MascotaFicha from './pages/MascotaFicha'
 import MascotaForm from './pages/MascotaForm'
-import MisMascotas from './pages/MisMascotas'
+import Mascotas from './pages/Mascotas'
 import Registro from './pages/Registro'
+import TurnoNuevo from './pages/TurnoNuevo'
+import Turnos from './pages/Turnos'
 
 const PERSONAL = ['recepcion', 'veterinario']
 
@@ -24,13 +29,15 @@ export default function App() {
       <Route element={<RutaProtegida />}>
         <Route element={<Layout />}>
           <Route path="/" element={<Inicio />} />
-          <Route path="/turnos" element={<EnConstruccion nombre="Turnos" />} />
+          <Route path="/turnos" element={<Turnos />} />
+          <Route path="/turnos/nuevo" element={<TurnoNuevo />} />
+          <Route path="/atenciones/:id" element={<AtencionDetalle />} />
+          <Route path="/mascotas" element={<Mascotas />} />
+          <Route path="/mascotas/nueva" element={<MascotaForm />} />
           <Route path="/mascotas/:id" element={<MascotaFicha />} />
           <Route path="/mascotas/:id/editar" element={<MascotaForm />} />
 
           <Route element={<RutaProtegida roles={['cliente']} />}>
-            <Route path="/mascotas" element={<MisMascotas />} />
-            <Route path="/mascotas/nueva" element={<MascotaForm />} />
             <Route path="/perfil" element={<ClienteFicha propio />} />
           </Route>
 
@@ -42,8 +49,13 @@ export default function App() {
             <Route path="/reportes" element={<EnConstruccion nombre="Reportes" />} />
           </Route>
 
+          <Route element={<RutaProtegida roles={['veterinario']} />}>
+            <Route path="/mascotas/:mascotaId/atenciones/nueva" element={<AtencionForm />} />
+            <Route path="/atenciones/:id/editar" element={<AtencionForm />} />
+          </Route>
+
           <Route element={<RutaProtegida roles={['recepcion']} />}>
-            <Route path="/disponibilidad" element={<EnConstruccion nombre="Disponibilidad" />} />
+            <Route path="/disponibilidad" element={<Disponibilidad />} />
           </Route>
 
           <Route path="*" element={<EnConstruccion nombre="Página no encontrada" />} />

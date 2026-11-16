@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, Boton, Campo, Cargando, Casilla, Select, Titulo } from '../components/ui'
+import FormCuenta from '../components/FormCuenta'
+import { Aviso, Boton, Campo, Cargando, Casilla, Modal, Select, Titulo } from '../components/ui'
 import { hoy } from '../utils'
 
 const VACIA = { nombre: '', especie_id: '', raza_id: '', especie_otra: '', sexo: '', fecha_nacimiento: '', microchip: '', color: '', esterilizado: false }
@@ -18,12 +19,19 @@ export default function MascotaForm() {
   const navegar = useNavigate()
   const editando = Boolean(id)
 
+  const esPersonal = usuario.rol !== 'cliente'
+  const hayQueElegirCliente = esPersonal && !editando && !clienteId
+  const [clienteElegido, setClienteElegido] = useState('')
+  const [creados, setCreados] = useState([]) // clientes dados de alta desde la ventana flotante
+  const [modalCliente, setModalCliente] = useState(false)
+  const [avisoCliente, setAvisoCliente] = useState('')
   const [form, setForm] = useState(VACIA)
   const [razas, setRazas] = useState([])
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
 
   const especies = useCarga(() => api.get('/catalogos/especies'), [])
+  const clientes = useCarga(() => (hayQueElegirCliente ? api.get('/clientes') : Promise.resolve(null)), [hayQueElegirCliente])
   const mascota = useCarga(() => (editando ? api.get(`/mascotas/${id}`) : Promise.resolve(null)), [id])
 
   // Al editar, se completa el formulario con los datos actuales
@@ -52,6 +60,15 @@ export default function MascotaForm() {
     api.get(`/catalogos/razas?especie_id=${form.especie_id}`).then((d) => setRazas(d.razas)).catch(() => setRazas([]))
   }, [form.especie_id, esOtro])
 
+  // Alta de cliente sin salir de la pantalla: queda elegido como dueño y se sigue con la mascota
+  const crearCliente = async (datos) => {
+    const { cliente } = await api.post('/clientes', datos)
+    setCreados((lista) => [cliente, ...lista])
+    setClienteElegido(String(cliente.id))
+    setAvisoCliente(`Cliente ${cliente.nombre} ${cliente.apellido} creado y elegido como dueño.`)
+    setModalCliente(false)
+  }
+
   const cambiar = (campo) => (e) => setForm({ ...form, [campo]: e.target.value })
   const cambiarEspecie = (e) => setForm({ ...form, especie_id: e.target.value, raza_id: '', especie_otra: '' })
 
@@ -77,7 +94,7 @@ export default function MascotaForm() {
         await api.put(`/mascotas/${id}`, cuerpo)
         navegar(`/mascotas/${id}`)
       } else {
-        if (usuario.rol !== 'cliente') cuerpo.cliente_id = Number(clienteId)
+        if (esPersonal) cuerpo.cliente_id = Number(clienteId || clienteElegido)
         const { mascota: nueva } = await api.post('/mascotas', cuerpo)
         navegar(`/mascotas/${nueva.id}`)
       }
@@ -87,17 +104,27 @@ export default function MascotaForm() {
     }
   }
 
-  if (especies.cargando || mascota.cargando) return <Cargando />
+  if (especies.cargando || mascota.cargando || clientes.cargando) return <Cargando />
 
-  const volver = editando ? `/mascotas/${id}` : usuario.rol === 'cliente' ? '/mascotas' : `/clientes/${clienteId}`
+  const volver = editando ? `/mascotas/${id}` : usuario.rol === 'cliente' || !clienteId ? '/mascotas' : `/clientes/${clienteId}`
 
   return (
     <div className="max-w-lg">
       <Titulo>{editando ? 'Editar mascota' : 'Nueva mascota'}</Titulo>
-      <Aviso tipo="error">{especies.error || mascota.error}</Aviso>
+      <Aviso tipo="error">{especies.error || mascota.error || clientes.error}</Aviso>
 
       <form onSubmit={guardar} className="space-y-4 rounded-xl bg-white p-5">
         <Aviso tipo="error">{error}</Aviso>
+        {hayQueElegirCliente && (
+          <div className="space-y-1">
+            <Select id="cliente" etiqueta="Dueño" required value={clienteElegido} onChange={(e) => setClienteElegido(e.target.value)}>
+              <option value="">Elegí un cliente</option>
+              {[...creados, ...(clientes.datos?.clientes || [])].map((c) => <option key={c.id} value={c.id}>{c.apellido}, {c.nombre} · {c.email}</option>)}
+            </Select>
+            <p className="text-sm text-tinta/70">¿El cliente todavía no existe? <button type="button" className="font-semibold text-mar underline" onClick={() => setModalCliente(true)}>Crealo ahora</button>.</p>
+            <Aviso tipo="ok">{avisoCliente}</Aviso>
+          </div>
+        )}
         <Campo id="nombre" etiqueta="Nombre" required maxLength={80} value={form.nombre} onChange={cambiar('nombre')} />
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -134,6 +161,10 @@ export default function MascotaForm() {
           <Link to={volver} className="inline-flex min-h-11 items-center rounded-lg border border-arena bg-white px-4 font-semibold hover:bg-arena">Cancelar</Link>
         </div>
       </form>
+
+      <Modal abierto={modalCliente} titulo="Nuevo cliente" onCerrar={() => setModalCliente(false)}>
+        <FormCuenta textoBoton="Crear cliente" onEnviar={crearCliente} />
+      </Modal>
     </div>
   )
 }

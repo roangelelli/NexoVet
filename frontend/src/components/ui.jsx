@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 // Componentes chicos y reutilizables. Todas las pantallas arman sus formularios con estos.
 
@@ -63,10 +64,15 @@ const coloresEstado = {
   anterior: 'bg-arena text-tinta/70',
 }
 
+const etiquetaEstado = (valor) => {
+  const texto = String(valor).replace('_', ' ')
+  return texto.charAt(0).toUpperCase() + texto.slice(1)
+}
+
 export function Estado({ valor }) {
   return (
     <span className={`inline-block rounded-full px-2.5 py-0.5 text-sm font-medium ${coloresEstado[valor] || 'bg-arena'}`}>
-      {String(valor).replace('_', ' ')}
+      {etiquetaEstado(valor)}
     </span>
   )
 }
@@ -130,5 +136,52 @@ export function BotonConfirmar({ texto, textoConfirmar, onConfirmar, cargando })
       <Boton variante="peligro" type="button" cargando={cargando} onClick={onConfirmar}>{textoConfirmar}</Boton>
       <Boton variante="secundario" type="button" onClick={() => setConfirmando(false)}>Cancelar</Boton>
     </span>
+  )
+}
+
+export function AreaTexto({ etiqueta, id, className = '', ...resto }) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium">{etiqueta}</label>
+      <textarea id={id} rows={3} className="w-full rounded-lg border border-arena bg-white px-3 py-2 text-base" {...resto} />
+    </div>
+  )
+}
+
+// Enlace con aspecto de botón (para ir a otra pantalla)
+export function EnlaceBoton({ to, variante = 'principal', className = '', children }) {
+  return (
+    <Link
+      to={to}
+      className={`inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold transition-colors ${estilosBoton[variante]} ${className}`}
+    >
+      {children}
+    </Link>
+  )
+}
+
+// Ventana flotante (usa <dialog>: se cierra con Esc y el foco queda adentro).
+// El contenido se arma recién al abrir, así los formularios empiezan vacíos cada vez.
+export function Modal({ abierto, titulo, onCerrar, children }) {
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const dialogo = ref.current
+    if (abierto && !dialogo.open) dialogo.showModal()
+    if (!abierto && dialogo.open) dialogo.close()
+  }, [abierto])
+
+  return (
+    <dialog ref={ref} onClose={onCerrar} className="m-auto w-[calc(100%-2rem)] max-w-lg rounded-2xl p-0 backdrop:bg-tinta/50">
+      {abierto && (
+        <div className="space-y-4 p-6">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="font-display text-2xl font-semibold">{titulo}</h2>
+            <Boton type="button" variante="secundario" onClick={onCerrar}>Cerrar</Boton>
+          </div>
+          {children}
+        </div>
+      )}
+    </dialog>
   )
 }

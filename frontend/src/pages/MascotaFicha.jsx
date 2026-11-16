@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, BotonConfirmar, Cargando, Titulo } from '../components/ui'
+import HistoriaClinica from '../components/HistoriaClinica'
+import { Aviso, BotonConfirmar, Cargando, EnlaceBoton, Titulo } from '../components/ui'
 import { edadTexto, fechaLegible } from '../utils'
 
 function Dato({ etiqueta, children }) {
@@ -20,6 +21,8 @@ export default function MascotaFicha() {
   const { usuario } = useAuth()
   const navegar = useNavigate()
   const { datos, cargando, error } = useCarga(() => api.get(`/mascotas/${id}`), [id])
+  const clienteId = datos?.mascota.cliente_id
+  const dueno = useCarga(() => (usuario.rol === 'cliente' || !clienteId ? Promise.resolve(null) : api.get(`/clientes/${clienteId}`)), [clienteId, usuario.rol])
   const [errorBaja, setErrorBaja] = useState('')
   const [dandoBaja, setDandoBaja] = useState(false)
 
@@ -43,11 +46,21 @@ export default function MascotaFicha() {
 
   return (
     <div className="space-y-6">
-      <Titulo accion={<Link to={`/mascotas/${id}/editar`} className="inline-flex min-h-11 items-center rounded-lg bg-mar px-4 font-semibold text-white hover:bg-mar-oscuro">Editar</Link>}>
+      <Titulo accion={
+        <span className="flex flex-wrap gap-2">
+          <EnlaceBoton to={`/turnos/nuevo?mascota=${id}`}>Pedir turno</EnlaceBoton>
+          <EnlaceBoton to={`/mascotas/${id}/editar`} variante="secundario">Editar</EnlaceBoton>
+        </span>
+      }>
         {m.nombre}
       </Titulo>
 
       <dl className="grid gap-4 rounded-xl bg-white p-5 sm:grid-cols-2">
+        {!esCliente && (
+          <Dato etiqueta="Dueño">
+            {dueno.datos ? <Link to={`/clientes/${m.cliente_id}`} className="text-mar underline">{dueno.datos.cliente.nombre} {dueno.datos.cliente.apellido}</Link> : '—'}
+          </Dato>
+        )}
         <Dato etiqueta="Especie">{m.especie === 'Otro' ? m.especie_otra : m.especie}</Dato>
         <Dato etiqueta="Raza">{m.raza || '—'}</Dato>
         <Dato etiqueta="Sexo">{m.sexo === 'macho' ? 'Macho' : 'Hembra'}</Dato>
@@ -58,7 +71,9 @@ export default function MascotaFicha() {
         <Dato etiqueta="Esterilizado/a">{m.esterilizado ? 'Sí' : 'No'}</Dato>
       </dl>
 
-      <Aviso tipo="info">La historia clínica y las vacunas de {m.nombre} se suman en las próximas etapas.</Aviso>
+      <HistoriaClinica mascotaId={id} puedeRegistrar={usuario.rol === 'veterinario'} />
+
+      <Aviso tipo="info">Las vacunas de {m.nombre} se suman en la próxima etapa.</Aviso>
 
       <Aviso tipo="error">{errorBaja}</Aviso>
       <div className="flex flex-wrap items-center gap-3">

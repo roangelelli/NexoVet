@@ -1,8 +1,23 @@
+const dos = (n) => String(n).padStart(2, '0')
+const aTexto = (d) => `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`
+
 // Fecha AAAA-MM-DD de hoy (hora local del navegador)
 export function hoy() {
-  const d = new Date()
-  const dos = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`
+  return aTexto(new Date())
+}
+
+// Suma (o resta) días a una fecha AAAA-MM-DD
+export function sumarDias(fecha, dias) {
+  const d = new Date(fecha + 'T12:00:00')
+  d.setDate(d.getDate() + dias)
+  return aTexto(d)
+}
+
+// Lunes de la semana de una fecha AAAA-MM-DD
+export function lunesDe(fecha) {
+  const d = new Date(fecha + 'T12:00:00')
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  return aTexto(d)
 }
 
 // 2024-03-15 → 15/03/2024

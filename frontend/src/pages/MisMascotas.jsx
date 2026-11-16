@@ -20,7 +20,7 @@ export default function MisMascotas() {
         <ul className="divide-y divide-arena rounded-xl bg-white">
           {datos.mascotas.map((m) => (
             <li key={m.id}>
-              <Link to={`/mascotas/${m.id}`} className="block px-4 py-4 hover:bg-bruma">
+              <Link to={`/mascotas/${m.id}`} className="block px-4 py-4 hover:bg-arena/60">
                 <span className="font-display text-xl font-semibold text-mar">{m.nombre}</span>
                 <span className="block text-tinta/70">
                   {m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''} · {edadTexto(m.fecha_nacimiento)}
