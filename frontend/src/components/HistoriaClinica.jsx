@@ -20,7 +20,7 @@ export default function HistoriaClinica({ mascotaId, puedeRegistrar }) {
       {cargando && <Cargando />}
       {datos && datos.atenciones.length === 0 && <Vacio>Todavía no hay atenciones registradas.</Vacio>}
       {datos && datos.atenciones.length > 0 && (
-        <ul className="divide-y divide-arena rounded-xl bg-white">
+        <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
           {datos.atenciones.map((a) => (
             <li key={a.id}>
               <Link to={`/atenciones/${a.id}`} className="block px-5 py-4 hover:bg-arena/60">

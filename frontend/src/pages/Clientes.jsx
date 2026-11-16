@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, Boton, Cargando, Titulo, Vacio } from '../components/ui'
+import { Aviso, Boton, Celda, Cargando, EnlaceBoton, Fila, Tabla, Titulo, Vacio } from '../components/ui'
 
 export default function Clientes() {
   const [texto, setTexto] = useState('')
@@ -19,7 +19,7 @@ export default function Clientes() {
 
   return (
     <div>
-      <Titulo accion={<Link to="/clientes/nuevo" className="inline-flex min-h-11 items-center rounded-lg bg-mar px-4 font-semibold text-white hover:bg-mar-oscuro">Nuevo cliente</Link>}>
+      <Titulo accion={<EnlaceBoton to="/clientes/nuevo" icono="mas">Nuevo cliente</EnlaceBoton>}>
         Clientes
       </Titulo>
 
@@ -32,7 +32,7 @@ export default function Clientes() {
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
         />
-        <Boton type="submit" variante="secundario">Buscar</Boton>
+        <Boton type="submit" variante="secundario" icono="buscar">Buscar</Boton>
       </form>
 
       <Aviso tipo="error">{error}</Aviso>
@@ -43,28 +43,15 @@ export default function Clientes() {
       )}
 
       {datos && datos.clientes.length > 0 && (
-        <div className="overflow-x-auto rounded-xl bg-white">
-          <table className="w-full text-left">
-            <thead className="border-b border-arena text-sm text-tinta/70">
-              <tr>
-                <th className="px-4 py-3 font-medium">Cliente</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Teléfono</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-arena">
-              {datos.clientes.map((c) => (
-                <tr key={c.id}>
-                  <td className="px-4 py-3">
-                    <Link to={`/clientes/${c.id}`} className="font-semibold text-mar underline">{c.apellido}, {c.nombre}</Link>
-                  </td>
-                  <td className="px-4 py-3">{c.email}</td>
-                  <td className="px-4 py-3">{c.telefono || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <Tabla columnas={['Cliente', 'Email', 'Teléfono']}>
+          {datos.clientes.map((c) => (
+            <Fila key={c.id}>
+              <Celda><Link to={`/clientes/${c.id}`} className="font-semibold text-mar underline">{c.apellido}, {c.nombre}</Link></Celda>
+              <Celda etiqueta="Email">{c.email}</Celda>
+              <Celda etiqueta="Teléfono">{c.telefono || '—'}</Celda>
+            </Fila>
+          ))}
+        </Tabla>
       )}
     </div>
   )

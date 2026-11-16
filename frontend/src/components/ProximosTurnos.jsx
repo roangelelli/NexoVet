@@ -12,7 +12,7 @@ export default function ProximosTurnos() {
   const proximos = (datos?.turnos || []).filter((t) => t.fecha >= hoy()).slice(0, 6)
 
   return (
-    <section className="mt-8 space-y-3">
+    <section className="space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-display text-2xl font-semibold">Próximos turnos</h2>
         <Link to="/turnos" className="text-mar underline">Ver agenda completa</Link>
@@ -20,12 +20,12 @@ export default function ProximosTurnos() {
 
       <Aviso tipo="error">{error}</Aviso>
       {cargando && <Cargando />}
-      {datos && proximos.length === 0 && <Vacio>No hay turnos confirmados próximos.</Vacio>}
+      {datos && proximos.length === 0 && <Vacio icono="calendario">No hay turnos confirmados próximos.</Vacio>}
 
       {proximos.length > 0 && (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {proximos.map((t) => (
-            <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-white p-4">
+            <li key={t.id} className="flex flex-col gap-2 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-4">
               <p className="font-display text-lg font-semibold">
                 {t.fecha === hoy() ? 'Hoy' : `${DIAS_CORTOS[new Date(t.fecha + 'T12:00:00').getDay()]} ${fechaLegible(t.fecha).slice(0, 5)}`} · {t.hora} hs
               </p>

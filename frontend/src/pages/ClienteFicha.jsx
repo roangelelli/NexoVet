@@ -3,7 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, Boton, BotonConfirmar, Campo, Cargando, Titulo, Vacio } from '../components/ui'
+import { AvatarMascota } from '../components/Animales'
+import { Aviso, Boton, BotonConfirmar, Campo, Cargando, EnlaceBoton, Titulo, Vacio } from '../components/ui'
+import Icono from '../components/Icono'
+import { useToast } from '../context/ToastContext'
 import { edadTexto } from '../utils'
 
 // Ficha del cliente: sus datos editables y sus mascotas.
@@ -12,6 +15,7 @@ export default function ClienteFicha({ propio = false }) {
   const { id: idUrl } = useParams()
   const { usuario } = useAuth()
   const navegar = useNavigate()
+  const { avisar } = useToast()
   const id = propio ? usuario.id : idUrl
 
   const { datos, cargando, error } = useCarga(() => api.get(`/clientes/${id}`), [id])
@@ -34,7 +38,7 @@ export default function ClienteFicha({ propio = false }) {
     setGuardando(true)
     try {
       await api.put(`/clientes/${id}`, form)
-      setMensaje({ tipo: 'ok', texto: 'Cambios guardados.' })
+      avisar('Cambios guardados.')
     } catch (err) {
       setMensaje({ tipo: 'error', texto: err.message })
     }
@@ -45,6 +49,7 @@ export default function ClienteFicha({ propio = false }) {
     setDandoBaja(true)
     try {
       await api.delete(`/clientes/${id}`)
+      avisar('Cliente dado de baja.')
       navegar('/clientes')
     } catch (err) {
       setMensaje({ tipo: 'error', texto: err.message })
@@ -61,12 +66,28 @@ export default function ClienteFicha({ propio = false }) {
     <div>
       <Titulo>{propio ? 'Mi perfil' : `${cliente.nombre} ${cliente.apellido}`}</Titulo>
 
-      {/* Para el personal: datos a la izquierda y mascotas a la derecha. Para el cliente: solo sus datos. */}
-      <div className={propio ? 'max-w-lg' : 'grid items-start gap-8 lg:grid-cols-[24rem_1fr]'}>
+      {/* Personal: datos a la izquierda y mascotas a la derecha. Cliente: tarjeta de resumen y sus datos editables. */}
+      <div className={`grid items-start gap-8 ${propio ? 'lg:grid-cols-[18rem_1fr]' : 'lg:grid-cols-[24rem_1fr]'}`}>
+        {propio && (
+          <aside className="flex flex-col items-center gap-3 rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-tinta/5">
+            <span className="grid size-20 place-items-center rounded-full bg-mar/10 font-display text-3xl font-semibold text-mar">
+              {cliente.nombre.charAt(0)}{cliente.apellido.charAt(0)}
+            </span>
+            <div>
+              <p className="font-display text-xl font-semibold">{cliente.nombre} {cliente.apellido}</p>
+              <p className="text-tinta/70">Cliente</p>
+            </div>
+            <ul className="w-full space-y-2 border-t border-arena pt-3 text-left text-sm">
+              <li className="flex items-center gap-2"><Icono nombre="mail" className="size-4 text-mar" /><span className="min-w-0 break-all">{cliente.email}</span></li>
+              <li className="flex items-center gap-2"><Icono nombre="telefono" className="size-4 text-mar" />{cliente.telefono || 'Sin teléfono'}</li>
+            </ul>
+          </aside>
+        )}
+
         <div className="space-y-4">
-          <form onSubmit={guardar} className="space-y-4 rounded-xl bg-white p-5">
+          <form onSubmit={guardar} className="space-y-4 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
             <Aviso tipo={mensaje.tipo}>{mensaje.texto}</Aviso>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${propio ? '' : 'lg:grid-cols-1 xl:grid-cols-2'}`}>
               <Campo id="nombre" etiqueta="Nombre" required maxLength={80} value={form.nombre} onChange={cambiar('nombre')} />
               <Campo id="apellido" etiqueta="Apellido" required maxLength={80} value={form.apellido} onChange={cambiar('apellido')} />
             </div>
@@ -84,18 +105,21 @@ export default function ClienteFicha({ propio = false }) {
           <section>
             <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <h2 className="font-display text-2xl font-semibold">Mascotas</h2>
-              <Link to={`/clientes/${id}/mascotas/nueva`} className="inline-flex min-h-11 items-center rounded-lg bg-mar px-4 font-semibold text-white hover:bg-mar-oscuro">Agregar mascota</Link>
+              <EnlaceBoton to={`/clientes/${id}/mascotas/nueva`} icono="mas">Agregar mascota</EnlaceBoton>
             </div>
             {mascotas.cargando && <Cargando />}
             <Aviso tipo="error">{mascotas.error}</Aviso>
             {mascotas.datos && mascotas.datos.mascotas.length === 0 && <Vacio>Este cliente todavía no tiene mascotas cargadas.</Vacio>}
             {mascotas.datos && mascotas.datos.mascotas.length > 0 && (
-              <ul className="divide-y divide-arena rounded-xl bg-white">
+              <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
                 {mascotas.datos.mascotas.map((m) => (
                   <li key={m.id}>
-                    <Link to={`/mascotas/${m.id}`} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 hover:bg-arena/60">
-                      <span className="font-semibold text-mar">{m.nombre}</span>
-                      <span className="text-tinta/70">{m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''} · {edadTexto(m.fecha_nacimiento)}</span>
+                    <Link to={`/mascotas/${m.id}`} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-arena/60">
+                      <AvatarMascota especie={m.especie} tamano="size-11" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block font-semibold text-mar">{m.nombre}</span>
+                        <span className="block text-sm text-tinta/70">{m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''} · {edadTexto(m.fecha_nacimiento)}</span>
+                      </span>
                     </Link>
                   </li>
                 ))}

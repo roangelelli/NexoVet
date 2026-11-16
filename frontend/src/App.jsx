@@ -1,7 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import RutaProtegida from './components/RutaProtegida'
-import { EnConstruccion } from './components/ui'
 import AtencionDetalle from './pages/AtencionDetalle'
 import AtencionForm from './pages/AtencionForm'
 import ClienteFicha from './pages/ClienteFicha'
@@ -12,8 +11,10 @@ import Inicio from './pages/Inicio'
 import Login from './pages/Login'
 import MascotaFicha from './pages/MascotaFicha'
 import MascotaForm from './pages/MascotaForm'
+import NoEncontrada from './pages/NoEncontrada'
 import Mascotas from './pages/Mascotas'
 import Registro from './pages/Registro'
+import Reportes from './pages/Reportes'
 import TurnoNuevo from './pages/TurnoNuevo'
 import Turnos from './pages/Turnos'
 
@@ -46,7 +47,7 @@ export default function App() {
             <Route path="/clientes/nuevo" element={<ClienteNuevo />} />
             <Route path="/clientes/:id" element={<ClienteFicha />} />
             <Route path="/clientes/:clienteId/mascotas/nueva" element={<MascotaForm />} />
-            <Route path="/reportes" element={<EnConstruccion nombre="Reportes" />} />
+            <Route path="/reportes" element={<Reportes />} />
           </Route>
 
           <Route element={<RutaProtegida roles={['veterinario']} />}>
@@ -58,7 +59,7 @@ export default function App() {
             <Route path="/disponibilidad" element={<Disponibilidad />} />
           </Route>
 
-          <Route path="*" element={<EnConstruccion nombre="Página no encontrada" />} />
+          <Route path="*" element={<NoEncontrada />} />
         </Route>
       </Route>
     </Routes>

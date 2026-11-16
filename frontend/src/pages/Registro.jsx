@@ -1,6 +1,7 @@
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import FormCuenta from '../components/FormCuenta'
+import PantallaAcceso from '../components/PantallaAcceso'
 
 export default function Registro() {
   const { usuario, registrarse } = useAuth()
@@ -9,15 +10,17 @@ export default function Registro() {
   if (usuario) return <Navigate to="/" replace />
 
   return (
-    <div className="grid min-h-screen place-items-center p-4">
-      <div className="w-full max-w-lg space-y-4 rounded-2xl bg-white p-6 shadow-sm">
-        <h1 className="font-display text-3xl font-bold text-mar">Creá tu cuenta</h1>
-        <p className="text-tinta/70">Con tu cuenta podés pedir turnos y ver los datos de tus mascotas.</p>
+    <PantallaAcceso titulo="Crear cuenta" ancho="max-w-lg">
+      <div className="space-y-5">
+        <div className="space-y-1">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">Creá tu cuenta</h1>
+          <p className="text-tinta/70">Con tu cuenta podés pedir turnos y ver los datos de tus mascotas.</p>
+        </div>
         <FormCuenta textoBoton="Crear cuenta" onEnviar={registrarse} />
         <p className="text-sm">
           ¿Ya tenés cuenta? <Link to="/login" className="font-semibold text-mar underline">Ingresá</Link>
         </p>
       </div>
-    </div>
+    </PantallaAcceso>
   )
 }

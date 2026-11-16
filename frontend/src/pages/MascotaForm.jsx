@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
 import FormCuenta from '../components/FormCuenta'
-import { Aviso, Boton, Campo, Cargando, Casilla, Modal, Select, Titulo } from '../components/ui'
+import { Aviso, Boton, Campo, Cargando, Casilla, DosColumnas, EnlaceBoton, Modal, PanelAyuda, Select, Titulo } from '../components/ui'
+import { useToast } from '../context/ToastContext'
 import { hoy } from '../utils'
+
+const PASOS_AYUDA = [
+  ['huella', 'Lo básico', 'Nombre, especie y sexo alcanzan para empezar.'],
+  ['historia', 'La raza depende de la especie', 'Elegí primero la especie y después la raza, si la tiene.'],
+  ['escudo', 'Microchip y nacimiento', 'Son opcionales, pero ayudan a identificar a la mascota y a calcular su edad.'],
+]
 
 const VACIA = { nombre: '', especie_id: '', raza_id: '', especie_otra: '', sexo: '', fecha_nacimiento: '', microchip: '', color: '', esterilizado: false }
 
@@ -24,7 +31,7 @@ export default function MascotaForm() {
   const [clienteElegido, setClienteElegido] = useState('')
   const [creados, setCreados] = useState([]) // clientes dados de alta desde la ventana flotante
   const [modalCliente, setModalCliente] = useState(false)
-  const [avisoCliente, setAvisoCliente] = useState('')
+  const { avisar } = useToast()
   const [form, setForm] = useState(VACIA)
   const [razas, setRazas] = useState([])
   const [error, setError] = useState('')
@@ -65,7 +72,7 @@ export default function MascotaForm() {
     const { cliente } = await api.post('/clientes', datos)
     setCreados((lista) => [cliente, ...lista])
     setClienteElegido(String(cliente.id))
-    setAvisoCliente(`Cliente ${cliente.nombre} ${cliente.apellido} creado y elegido como dueño.`)
+    avisar(`Cliente ${cliente.nombre} ${cliente.apellido} creado y elegido como dueño.`)
     setModalCliente(false)
   }
 
@@ -92,10 +99,12 @@ export default function MascotaForm() {
     try {
       if (editando) {
         await api.put(`/mascotas/${id}`, cuerpo)
+        avisar('Cambios guardados.')
         navegar(`/mascotas/${id}`)
       } else {
         if (esPersonal) cuerpo.cliente_id = Number(clienteId || clienteElegido)
         const { mascota: nueva } = await api.post('/mascotas', cuerpo)
+        avisar(`Mascota ${nueva.nombre} creada.`)
         navegar(`/mascotas/${nueva.id}`)
       }
     } catch (err) {
@@ -109,11 +118,12 @@ export default function MascotaForm() {
   const volver = editando ? `/mascotas/${id}` : usuario.rol === 'cliente' || !clienteId ? '/mascotas' : `/clientes/${clienteId}`
 
   return (
-    <div className="max-w-lg">
+    <div>
       <Titulo>{editando ? 'Editar mascota' : 'Nueva mascota'}</Titulo>
       <Aviso tipo="error">{especies.error || mascota.error || clientes.error}</Aviso>
 
-      <form onSubmit={guardar} className="space-y-4 rounded-xl bg-white p-5">
+      <DosColumnas lateral={<PanelAyuda titulo="Qué datos cargar" pasos={PASOS_AYUDA} />}>
+      <form onSubmit={guardar} className="space-y-4 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
         <Aviso tipo="error">{error}</Aviso>
         {hayQueElegirCliente && (
           <div className="space-y-1">
@@ -122,12 +132,11 @@ export default function MascotaForm() {
               {[...creados, ...(clientes.datos?.clientes || [])].map((c) => <option key={c.id} value={c.id}>{c.apellido}, {c.nombre} · {c.email}</option>)}
             </Select>
             <p className="text-sm text-tinta/70">¿El cliente todavía no existe? <button type="button" className="font-semibold text-mar underline" onClick={() => setModalCliente(true)}>Crealo ahora</button>.</p>
-            <Aviso tipo="ok">{avisoCliente}</Aviso>
           </div>
         )}
         <Campo id="nombre" etiqueta="Nombre" required maxLength={80} value={form.nombre} onChange={cambiar('nombre')} />
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select id="especie" etiqueta="Especie" required value={form.especie_id} onChange={cambiarEspecie}>
             <option value="">Elegí una especie</option>
             {especies.datos?.especies.map((e) => <option key={e.id} value={e.id}>{e.nombre}</option>)}
@@ -149,7 +158,7 @@ export default function MascotaForm() {
           </Select>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Campo id="fecha_nacimiento" etiqueta="Fecha de nacimiento (opcional)" type="date" max={hoy()} value={form.fecha_nacimiento} onChange={cambiar('fecha_nacimiento')} />
           <Campo id="color" etiqueta="Color (opcional)" maxLength={50} value={form.color} onChange={cambiar('color')} />
         </div>
@@ -158,9 +167,10 @@ export default function MascotaForm() {
 
         <div className="flex flex-wrap gap-2">
           <Boton type="submit" cargando={guardando}>{editando ? 'Guardar cambios' : 'Crear mascota'}</Boton>
-          <Link to={volver} className="inline-flex min-h-11 items-center rounded-lg border border-arena bg-white px-4 font-semibold hover:bg-arena">Cancelar</Link>
+          <EnlaceBoton to={volver} variante="secundario">Cancelar</EnlaceBoton>
         </div>
       </form>
+      </DosColumnas>
 
       <Modal abierto={modalCliente} titulo="Nuevo cliente" onCerrar={() => setModalCliente(false)}>
         <FormCuenta textoBoton="Crear cliente" onEnviar={crearCliente} />

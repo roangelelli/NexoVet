@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
 import { Aviso, Boton, Campo, Cargando, Select, Titulo, Vacio } from '../components/ui'
+import { useToast } from '../context/ToastContext'
 import { fechaLegible, hoy } from '../utils'
 
 const textoDuracion = (minutos) => (minutos === 60 ? '1 hora' : `${minutos} minutos`)
@@ -14,7 +15,8 @@ const DIAS = [
 // Configuración de la agenda general: duración del turno, horarios de atención y días sin atención
 export default function Disponibilidad() {
   const { datos, cargando, error, recargar } = useCarga(() => api.get('/disponibilidad'), [])
-  const [mensaje, setMensaje] = useState({ tipo: 'ok', texto: '' })
+  const { avisar } = useToast()
+  const [mensaje, setMensaje] = useState({ tipo: 'error', texto: '' })
 
   const [duracion, setDuracion] = useState('')
   const [tramo, setTramo] = useState({ dia_semana: 'lunes', hora_inicio: '09:00', hora_fin: '13:00' })
@@ -22,10 +24,10 @@ export default function Disponibilidad() {
 
   // Ejecuta una acción, avisa el resultado y recarga la configuración
   const ejecutar = async (accion, textoOk) => {
-    setMensaje({ tipo: 'ok', texto: '' })
+    setMensaje({ tipo: 'error', texto: '' })
     try {
       await accion()
-      setMensaje({ tipo: 'ok', texto: textoOk })
+      avisar(textoOk)
       recargar()
     } catch (err) {
       setMensaje({ tipo: 'error', texto: err.message })
@@ -61,19 +63,10 @@ export default function Disponibilidad() {
       <Titulo>Disponibilidad</Titulo>
       <Aviso tipo={mensaje.tipo}>{mensaje.texto}</Aviso>
 
-      <section className="space-y-3">
-        <h2 className="font-display text-2xl font-semibold">Duración del turno</h2>
-        <form onSubmit={guardarDuracion} className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-5">
-          <Select id="duracion" etiqueta="Duración de cada turno" className="w-56" value={valorDuracion} onChange={(e) => setDuracion(e.target.value)}>
-            {opcionesDuracion.map((minutos) => <option key={minutos} value={minutos}>{textoDuracion(minutos)}</option>)}
-          </Select>
-          <Boton type="submit">Guardar duración</Boton>
-        </form>
-      </section>
-
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
       <section className="space-y-3">
         <h2 className="font-display text-2xl font-semibold">Horarios de atención</h2>
-        <div className="divide-y divide-arena rounded-xl bg-white">
+        <div className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
           {DIAS.map(([clave, nombre]) => {
             const tramos = datos.tramos.filter((t) => t.dia_semana === clave)
             return (
@@ -95,7 +88,7 @@ export default function Disponibilidad() {
           })}
         </div>
 
-        <form onSubmit={agregarTramo} className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-5">
+        <form onSubmit={agregarTramo} className="flex flex-wrap items-end gap-3 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
           <Select id="dia" etiqueta="Día" value={tramo.dia_semana} onChange={(e) => setTramo({ ...tramo, dia_semana: e.target.value })}>
             {DIAS.map(([clave, nombre]) => <option key={clave} value={clave}>{nombre}</option>)}
           </Select>
@@ -105,11 +98,23 @@ export default function Disponibilidad() {
         </form>
       </section>
 
+
+        <div className="space-y-8">
+      <section className="space-y-3">
+        <h2 className="font-display text-2xl font-semibold">Duración del turno</h2>
+        <form onSubmit={guardarDuracion} className="flex flex-wrap items-end gap-3 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
+          <Select id="duracion" etiqueta="Duración de cada turno" className="w-56" value={valorDuracion} onChange={(e) => setDuracion(e.target.value)}>
+            {opcionesDuracion.map((minutos) => <option key={minutos} value={minutos}>{textoDuracion(minutos)}</option>)}
+          </Select>
+          <Boton type="submit">Guardar duración</Boton>
+        </form>
+      </section>
+
       <section className="space-y-3">
         <h2 className="font-display text-2xl font-semibold">Días sin atención</h2>
         {datos.dias_bloqueados.length === 0 && <Vacio>No hay días bloqueados. Agregá feriados o cierres con el formulario de abajo.</Vacio>}
         {datos.dias_bloqueados.length > 0 && (
-          <ul className="divide-y divide-arena rounded-xl bg-white">
+          <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
             {datos.dias_bloqueados.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3">
                 <span><span className="font-semibold">{fechaLegible(d.fecha)}</span>{d.motivo ? ` · ${d.motivo}` : ''}</span>
@@ -122,12 +127,14 @@ export default function Disponibilidad() {
           </ul>
         )}
 
-        <form onSubmit={agregarBloqueo} className="flex flex-wrap items-end gap-3 rounded-xl bg-white p-5">
+        <form onSubmit={agregarBloqueo} className="flex flex-wrap items-end gap-3 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
           <Campo id="fecha" etiqueta="Fecha" type="date" min={hoy()} required value={bloqueo.fecha} onChange={(e) => setBloqueo({ ...bloqueo, fecha: e.target.value })} />
           <Campo id="motivo" etiqueta="Motivo (opcional)" maxLength={150} value={bloqueo.motivo} onChange={(e) => setBloqueo({ ...bloqueo, motivo: e.target.value })} className="min-w-56 flex-1" />
           <Boton type="submit">Bloquear día</Boton>
         </form>
       </section>
+        </div>
+      </div>
     </div>
   )
 }

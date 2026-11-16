@@ -29,13 +29,13 @@ export default function FormCuenta({ textoBoton, onEnviar }) {
   return (
     <form onSubmit={enviar} className="space-y-4">
       <Aviso tipo="error">{error}</Aviso>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo id="nombre" etiqueta="Nombre" required maxLength={80} autoComplete="given-name" value={datos.nombre} onChange={cambiar('nombre')} />
         <Campo id="apellido" etiqueta="Apellido" required maxLength={80} autoComplete="family-name" value={datos.apellido} onChange={cambiar('apellido')} />
       </div>
       <Campo id="email" etiqueta="Email" type="email" required maxLength={150} autoComplete="email" value={datos.email} onChange={cambiar('email')} />
       <Campo id="telefono" etiqueta="Teléfono (opcional)" type="tel" maxLength={30} autoComplete="tel" value={datos.telefono} onChange={cambiar('telefono')} />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Campo id="password" etiqueta="Contraseña" type="password" required autoComplete="new-password" ayuda="Mínimo 8 caracteres." value={datos.password} onChange={cambiar('password')} />
         <Campo id="repetir" etiqueta="Repetir contraseña" type="password" required autoComplete="new-password" value={datos.repetir} onChange={cambiar('repetir')} />
       </div>

@@ -39,3 +39,32 @@ export function edadTexto(fechaNacimiento) {
   const anios = Math.floor(meses / 12)
   return anios === 1 ? '1 año' : `${anios} años`
 }
+
+// Primer y último día de un mes: 0 = este mes, -1 = el mes anterior
+export function rangoMes(desplazamiento = 0) {
+  const ahora = new Date()
+  const primero = new Date(ahora.getFullYear(), ahora.getMonth() + desplazamiento, 1, 12)
+  const ultimo = new Date(primero.getFullYear(), primero.getMonth() + 1, 0, 12)
+  return [aTexto(primero), aTexto(ultimo)]
+}
+
+// Días de diferencia entre dos fechas AAAA-MM-DD (negativo si "hasta" es anterior)
+export function diasEntre(desde, hasta) {
+  return Math.round((new Date(hasta + 'T12:00:00') - new Date(desde + 'T12:00:00')) / 86400000)
+}
+
+const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
+
+// "Hoy", "Mañana" o "jue 19/11" para mostrar cuándo es un turno
+export function etiquetaDia(fecha) {
+  const f = fecha.slice(0, 10)
+  if (f === hoy()) return 'Hoy'
+  if (f === sumarDias(hoy(), 1)) return 'Mañana'
+  return `${DIAS_CORTOS[new Date(f + 'T12:00:00').getDay()]} ${fechaLegible(f).slice(0, 5)}`
+}
+
+// Hora actual como HH:MM (hora local del navegador)
+export function horaActual() {
+  const d = new Date()
+  return `${dos(d.getHours())}:${dos(d.getMinutes())}`
+}

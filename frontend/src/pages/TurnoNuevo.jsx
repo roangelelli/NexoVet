@@ -3,14 +3,23 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, Boton, Campo, Cargando, Select, Titulo, Vacio } from '../components/ui'
-import { hoy } from '../utils'
+import { Aviso, Boton, Campo, Cargando, DosColumnas, EnlaceBoton, PanelAyuda, Select, Titulo, Vacio } from '../components/ui'
+import { useToast } from '../context/ToastContext'
+import { etiquetaDia, hoy } from '../utils'
+
+const PASOS = [
+  ['huella', 'Elegí a tu mascota', 'Para quién es el turno.'],
+  ['calendario', 'Elegí el día', 'Te mostramos los horarios libres de ese día.'],
+  ['reloj', 'Elegí el horario y reservá', 'Si querés, contanos el motivo de la consulta.'],
+  ['calendario-ok', 'La clínica lo confirma', 'El turno queda "Solicitado" hasta que lo confirmen. Lo ves en Turnos y podés cancelarlo.'],
+]
 
 // Pedir un turno: se elige mascota, día y una franja libre.
 // El personal llega desde la ficha de la mascota (/turnos/nuevo?mascota=ID); el cliente elige entre las suyas.
 export default function TurnoNuevo() {
   const { usuario } = useAuth()
   const navegar = useNavigate()
+  const { avisar } = useToast()
   const [params] = useSearchParams()
   const esCliente = usuario.rol === 'cliente'
   const mascotaUrl = params.get('mascota')
@@ -46,6 +55,8 @@ export default function TurnoNuevo() {
     setEnviando(true)
     try {
       await api.post('/turnos', { mascota_id: Number(mascotaId), fecha, hora, motivo })
+      const nombre = mascotas.datos?.mascota?.nombre || mascotas.datos?.mascotas?.find((m) => String(m.id) === String(mascotaId))?.nombre
+      avisar(`Turno solicitado${nombre ? ` para ${nombre}` : ''}: ${etiquetaDia(fecha)} a las ${hora.slice(0, 5)} hs. La clínica lo va a confirmar.`)
       navegar('/turnos')
     } catch (err) {
       setError(err.message)
@@ -69,7 +80,7 @@ export default function TurnoNuevo() {
   const mascotaFija = !esCliente ? mascotas.datos?.mascota : null
 
   return (
-    <div className="max-w-lg">
+    <div>
       <Titulo>Pedir turno</Titulo>
       <Aviso tipo="error">{mascotas.error}</Aviso>
 
@@ -78,7 +89,8 @@ export default function TurnoNuevo() {
       )}
 
       {(mascotaFija || lista.length > 0) && (
-        <form onSubmit={reservar} className="space-y-4 rounded-xl bg-white p-5">
+        <DosColumnas lateral={<PanelAyuda titulo="Cómo funciona" pasos={PASOS} />}>
+        <form onSubmit={reservar} className="space-y-4 rounded-xl bg-white shadow-sm ring-1 ring-tinta/5 p-5">
           <Aviso tipo="error">{error}</Aviso>
 
           {mascotaFija ? (
@@ -113,9 +125,10 @@ export default function TurnoNuevo() {
 
           <div className="flex flex-wrap gap-2">
             <Boton type="submit" cargando={enviando} disabled={!hora || !(mascotaFija || mascotaId)}>Reservar turno</Boton>
-            <Link to="/turnos" className="inline-flex min-h-11 items-center rounded-lg border border-arena bg-white px-4 font-semibold hover:bg-arena">Cancelar</Link>
+            <EnlaceBoton to="/turnos" variante="secundario">Cancelar</EnlaceBoton>
           </div>
         </form>
+        </DosColumnas>
       )}
     </div>
   )

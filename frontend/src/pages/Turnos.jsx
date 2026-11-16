@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
 import { Aviso, Boton, BotonConfirmar, Cargando, EnlaceBoton, Estado, Select, Titulo, Vacio } from '../components/ui'
+import { useToast } from '../context/ToastContext'
 import { fechaLegible, hoy, lunesDe, sumarDias } from '../utils'
 
 const DIAS_CORTOS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']
@@ -16,10 +17,13 @@ function diaYFecha(fecha) {
 // Misma ruta para todos: el cliente ve sus turnos y el personal ve la agenda
 export default function Turnos() {
   const { usuario } = useAuth()
-  return usuario.rol === 'cliente' ? <MisTurnos /> : <Agenda />
+  const { search } = useLocation()
+  // Con key = la consulta de la URL, tocar "Turnos" en el menú vuelve a los filtros por defecto
+  return usuario.rol === 'cliente' ? <MisTurnos /> : <Agenda key={search} />
 }
 
 function MisTurnos() {
+  const { avisar } = useToast()
   const { datos, cargando, error, recargar } = useCarga(() => api.get('/turnos'), [])
   const [errorAccion, setErrorAccion] = useState('')
 
@@ -27,6 +31,7 @@ function MisTurnos() {
     setErrorAccion('')
     try {
       await api.patch(`/turnos/${id}/cancelar`)
+      avisar('Turno cancelado.')
       recargar()
     } catch (err) {
       setErrorAccion(err.message)
@@ -48,14 +53,14 @@ function MisTurnos() {
             <h2 className="font-display text-2xl font-semibold">Próximos</h2>
             {proximos.length === 0 && <Vacio>No tenés turnos próximos. Tocá "Pedir turno" para reservar uno.</Vacio>}
             {proximos.length > 0 && (
-              <ul className="divide-y divide-arena rounded-xl bg-white">
+              <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
                 {proximos.map((t) => (
                   <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
                     <div>
                       <p className="font-display text-xl font-semibold">{diaYFecha(t.fecha)} · {t.hora} hs</p>
                       <p className="text-tinta/70">{t.mascota}{t.motivo ? ` · ${t.motivo}` : ''}</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
                       <Estado valor={t.estado} />
                       <BotonConfirmar texto="Cancelar turno" textoConfirmar="Sí, cancelar" onConfirmar={() => cancelar(t.id)} />
                     </div>
@@ -68,7 +73,7 @@ function MisTurnos() {
           {anteriores.length > 0 && (
             <section className="space-y-3">
               <h2 className="font-display text-2xl font-semibold">Anteriores</h2>
-              <ul className="divide-y divide-arena rounded-xl bg-white">
+              <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
                 {anteriores.map((t) => (
                   <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
                     <span>{diaYFecha(t.fecha)} · {t.hora} hs · {t.mascota}</span>
@@ -101,10 +106,15 @@ const ESTADOS = [
 
 function Agenda() {
   const { usuario } = useAuth()
+  const { avisar } = useToast()
   const esVeterinario = usuario.rol === 'veterinario'
-  const [periodo, setPeriodo] = useState('hoy')
+  // Se puede llegar con filtros desde el inicio: /turnos?periodo=todas&estado=solicitado
+  const [paramsUrl] = useSearchParams()
+  const periodoUrl = paramsUrl.get('periodo')
+  const estadoUrl = paramsUrl.get('estado')
+  const [periodo, setPeriodo] = useState(PERIODOS.some(([v]) => v === periodoUrl) ? periodoUrl : 'hoy')
   const [dia, setDia] = useState(hoy())
-  const [estado, setEstado] = useState('')
+  const [estado, setEstado] = useState(ESTADOS.some(([v]) => v === estadoUrl) ? estadoUrl : '')
   const [errorAccion, setErrorAccion] = useState('')
 
   // Hoy y "un día" se filtran en el servidor; las semanas se recortan acá
@@ -126,6 +136,7 @@ function Agenda() {
     setErrorAccion('')
     try {
       await api.patch(`/turnos/${id}/${accion}`)
+      avisar({ confirmar: 'Turno confirmado.', atender: 'Turno marcado como atendido.', cancelar: 'Turno cancelado.' }[accion])
       recargar()
     } catch (err) {
       setErrorAccion(err.message)
@@ -157,7 +168,7 @@ function Agenda() {
       {datos && turnos.length === 0 && <Vacio>No hay turnos con estos filtros.</Vacio>}
 
       {datos && turnos.length > 0 && (
-        <ul className="divide-y divide-arena rounded-xl bg-white">
+        <ul className="divide-y divide-arena rounded-xl bg-white shadow-sm ring-1 ring-tinta/5">
           {turnos.map((t) => (
             <li key={t.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
               <div>
@@ -170,7 +181,7 @@ function Agenda() {
                 </p>
                 {t.motivo && <p className="text-tinta/70">{t.motivo}</p>}
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto [&>button]:flex-1 [&>a]:flex-1 sm:[&>button]:flex-none sm:[&>a]:flex-none">
                 <Estado valor={t.estado} />
                 {t.estado === 'solicitado' && <Boton type="button" onClick={() => cambiar(t.id, 'confirmar')}>Confirmar</Boton>}
                 {t.estado === 'confirmado' && esVeterinario && (

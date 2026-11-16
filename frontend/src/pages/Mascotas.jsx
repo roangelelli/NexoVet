@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 import { useCarga } from '../hooks/useCarga'
-import { Aviso, Boton, Cargando, EnlaceBoton, Titulo, Vacio } from '../components/ui'
+import { Aviso, Boton, Celda, Cargando, EnlaceBoton, Fila, Tabla, Titulo, Vacio } from '../components/ui'
 import { edadTexto } from '../utils'
+import { AvatarMascota } from '../components/Animales'
 import MisMascotas from './MisMascotas'
 
 // El cliente ve sus mascotas; el personal puede buscar entre todas
@@ -53,39 +54,31 @@ function BuscarMascotas() {
       )}
 
       {mascotas.datos && mascotas.datos.mascotas.length > 0 && (
-        <div className="overflow-x-auto rounded-xl bg-white">
-          <table className="w-full text-left">
-            <thead className="border-b border-arena text-sm text-tinta/70">
-              <tr>
-                <th className="px-4 py-3 font-medium">Mascota</th>
-                <th className="px-4 py-3 font-medium">Especie y raza</th>
-                <th className="px-4 py-3 font-medium">Edad</th>
-                <th className="px-4 py-3 font-medium">Dueño</th>
-                {esVeterinario && <th className="px-4 py-3"><span className="sr-only">Acciones</span></th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-arena">
-              {mascotas.datos.mascotas.map((m) => {
-                const dueno = duenos[m.cliente_id]
-                return (
-                  <tr key={m.id}>
-                    <td className="px-4 py-3"><Link to={`/mascotas/${m.id}`} className="font-semibold text-mar underline">{m.nombre}</Link></td>
-                    <td className="px-4 py-3">{m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''}</td>
-                    <td className="px-4 py-3">{edadTexto(m.fecha_nacimiento)}</td>
-                    <td className="px-4 py-3">
-                      {dueno ? <Link to={`/clientes/${dueno.id}`} className="text-mar underline">{dueno.apellido}, {dueno.nombre}</Link> : '—'}
-                    </td>
-                    {esVeterinario && (
-                      <td className="px-4 py-2 text-right">
-                        <EnlaceBoton to={`/mascotas/${m.id}/atenciones/nueva`} variante="secundario">Atención espontánea</EnlaceBoton>
-                      </td>
-                    )}
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <Tabla columnas={['Mascota', 'Especie y raza', 'Edad', 'Dueño', ...(esVeterinario ? [''] : [])]}>
+          {mascotas.datos.mascotas.map((m) => {
+            const dueno = duenos[m.cliente_id]
+            return (
+              <Fila key={m.id}>
+                <Celda>
+                  <span className="flex items-center gap-3">
+                    <AvatarMascota especie={m.especie} tamano="size-10" />
+                    <Link to={`/mascotas/${m.id}`} className="font-semibold text-mar underline">{m.nombre}</Link>
+                  </span>
+                </Celda>
+                <Celda etiqueta="Especie y raza">{m.especie === 'Otro' ? m.especie_otra : m.especie}{m.raza ? ` · ${m.raza}` : ''}</Celda>
+                <Celda etiqueta="Edad">{edadTexto(m.fecha_nacimiento)}</Celda>
+                <Celda etiqueta="Dueño">
+                  {dueno ? <Link to={`/clientes/${dueno.id}`} className="text-mar underline">{dueno.apellido}, {dueno.nombre}</Link> : '—'}
+                </Celda>
+                {esVeterinario && (
+                  <Celda className="md:text-right">
+                    <EnlaceBoton to={`/mascotas/${m.id}/atenciones/nueva`} variante="secundario" className="mt-2 w-full md:mt-0 md:w-auto">Atención espontánea</EnlaceBoton>
+                  </Celda>
+                )}
+              </Fila>
+            )
+          })}
+        </Tabla>
       )}
     </div>
   )
