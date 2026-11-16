@@ -1,12 +1,25 @@
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { Aviso, Titulo } from '../components/ui'
+import { SECCIONES } from '../secciones'
+import { Titulo } from '../components/ui'
 
 export default function Inicio() {
   const { usuario } = useAuth()
+  const accesos = SECCIONES.filter((s) => s.descripcion && s.roles.includes(usuario.rol))
+
   return (
     <div>
       <Titulo>Hola, {usuario.nombre}</Titulo>
-      <Aviso tipo="info">Sesión iniciada. Las pantallas de cada sección se suman en las próximas etapas.</Aviso>
+      <ul className="divide-y divide-arena rounded-xl bg-white">
+        {accesos.map((s) => (
+          <li key={s.ruta}>
+            <Link to={s.ruta} className="block px-4 py-4 hover:bg-bruma">
+              <span className="font-display text-xl font-semibold text-mar">{s.texto}</span>
+              <span className="mt-0.5 block text-tinta/70">{s.descripcion}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

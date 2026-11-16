@@ -1,3 +1,5 @@
+import { useState } from 'react'
+
 // Componentes chicos y reutilizables. Todas las pantallas arman sus formularios con estos.
 
 const estilosBoton = {
@@ -88,5 +90,45 @@ export function EnConstruccion({ nombre }) {
       <Titulo>{nombre}</Titulo>
       <Aviso tipo="info">Esta pantalla se construye en una de las próximas etapas.</Aviso>
     </div>
+  )
+}
+
+export function Select({ etiqueta, id, className = '', children, ...resto }) {
+  return (
+    <div className={className}>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium">{etiqueta}</label>
+      <select id={id} className="min-h-11 w-full rounded-lg border border-arena bg-white px-3 text-base" {...resto}>
+        {children}
+      </select>
+    </div>
+  )
+}
+
+export function Casilla({ etiqueta, id, className = '', ...resto }) {
+  return (
+    <label htmlFor={id} className={`flex min-h-11 items-center gap-2 ${className}`}>
+      <input id={id} type="checkbox" className="size-5 accent-mar" {...resto} />
+      <span>{etiqueta}</span>
+    </label>
+  )
+}
+
+// Pantalla o lista sin datos: dice qué pasó y qué hacer
+export function Vacio({ children }) {
+  return <p className="rounded-lg border border-dashed border-arena bg-white px-4 py-8 text-center text-tinta/70">{children}</p>
+}
+
+// Dar de baja en dos pasos, sin ventanas emergentes: primero "Dar de baja", después "Sí, dar de baja"
+export function BotonConfirmar({ texto, textoConfirmar, onConfirmar, cargando }) {
+  const [confirmando, setConfirmando] = useState(false)
+
+  if (!confirmando) {
+    return <Boton variante="secundario" type="button" onClick={() => setConfirmando(true)}>{texto}</Boton>
+  }
+  return (
+    <span className="inline-flex flex-wrap gap-2">
+      <Boton variante="peligro" type="button" cargando={cargando} onClick={onConfirmar}>{textoConfirmar}</Boton>
+      <Boton variante="secundario" type="button" onClick={() => setConfirmando(false)}>Cancelar</Boton>
+    </span>
   )
 }

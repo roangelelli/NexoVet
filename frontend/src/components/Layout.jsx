@@ -1,18 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { SECCIONES } from '../secciones'
 import { Boton } from './ui'
-
-const PERSONAL = ['recepcion', 'veterinario']
-
-// Cada rol ve solo las secciones que le corresponden
-const SECCIONES = [
-  { ruta: '/', texto: 'Inicio', roles: ['recepcion', 'veterinario', 'cliente'], exacta: true },
-  { ruta: '/turnos', texto: 'Turnos', roles: ['recepcion', 'veterinario', 'cliente'] },
-  { ruta: '/clientes', texto: 'Clientes', roles: PERSONAL },
-  { ruta: '/mascotas', texto: 'Mis mascotas', roles: ['cliente'] },
-  { ruta: '/disponibilidad', texto: 'Disponibilidad', roles: ['recepcion'] },
-  { ruta: '/reportes', texto: 'Reportes', roles: PERSONAL },
-]
 
 const NOMBRE_ROL = { recepcion: 'Recepción', veterinario: 'Veterinario/a', cliente: 'Cliente' }
 
