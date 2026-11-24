@@ -10,6 +10,22 @@ API: el **personal de la veterinaria** (gestión interna) y el **cliente**
 
 ---
 
+## Enlaces y entregables
+
+| Qué | Dónde |
+|-----|-------|
+| **Aplicación en línea (frontend)** | https://nexo-vet.vercel.app |
+| **API en línea (backend)** | https://nexovet-api.onrender.com — estado en [`/api/health`](https://nexovet-api.onrender.com/api/health) |
+| **Informe final (PDF)** | [`docs/Informe_Final_NexoVet.pdf`](docs/Informe_Final_NexoVet.pdf) |
+| **Video explicativo** | [pendiente] |
+| **Repositorio** | https://github.com/roangelelli/NexoVet |
+
+> La API y la base de datos están en planes gratuitos: si estuvieron un rato sin
+uso, el primer pedido (por ejemplo, el inicio de sesión) puede tardar hasta un
+minuto en responder mientras los servicios se reactivan.
+
+---
+
 ## Equipo y contexto académico
 
 **Trabajo Final Integrador (TFI)**
@@ -44,8 +60,8 @@ de quien inicia sesión.
 
 El **MVP** es el conjunto de funcionalidades indispensables para cumplir el objetivo de punta a punta: que la veterinaria
 digitalice su gestión y que el cliente pueda autogestionarse. Los módulos se
-priorizan en tres niveles, de modo que si por algún contratiempo no se llega a desarrollar la totalidad del proyecto se sabe con
-claridad desde dónde recortar sin comprometer el objetivo.
+priorizaron en tres niveles. **En la versión entregada están implementados el núcleo y
+los tres módulos secundarios**; lo que quedó fuera es lo listado en «Fuera del alcance».
 
 ### Núcleo indispensable
 
@@ -62,18 +78,17 @@ Turnos e Historia clínica**. Con esto, el objetivo del proyecto ya se cumple.
 
 ### Módulos secundarios (versión mínima)
 
-Aportan valor, pero el sistema funciona sin ellos. Se desarrollan una vez
-terminado el núcleo y son los primeros candidatos a recortar ante falta de
-tiempo:
+Aportan valor, pero el sistema funciona sin ellos. Se desarrollaron una vez
+terminado el núcleo y **están implementados**:
 
-- **Vacunas:** listado por mascota con fecha de aplicación y próxima fecha calculada.
+- **Vacunas:** listado por mascota con fecha de aplicación y próxima fecha calculada, con estado derivado (vigente, por vencer, vencida).
 - **Imágenes en la historia clínica:** adjuntar fotos o radiografías a cada atención.
-- **Reportes básicos:** consultas de apoyo, como los turnos del día.
+- **Reportes básicos:** consultas de apoyo, como los turnos del día y un resumen del período.
 
 ### Fuera del alcance (mejoras futuras)
 
-Se excluyen deliberadamente de esta versión para garantizar la viabilidad: pagos en línea, notificaciones y recordatorios automáticos,
-reprogramación automática de turnos, mensajería o chat interno, asistentes con
+Se excluyen deliberadamente de esta versión para garantizar la viabilidad: pagos en línea, envío de correos, notificaciones y recordatorios automáticos,
+instalación de la app desde el navegador (PWA), reprogramación automática de turnos, mensajería o chat interno, asistentes con
 inteligencia artificial, integración con controladores fiscales, disponibilidad
 por profesional, gestión de cuentas del personal desde la app y aplicación móvil nativa.
 
@@ -119,6 +134,7 @@ veterinario al solicitar un turno. El profesional que realiza la atención se re
 - **Historia clínica:** registro de cada atención, con imágenes adjuntas.
 - **Vacunas:** listado por mascota con tipo, fecha de aplicación, veterinario y observaciones. La próxima fecha se calcula según el intervalo definido en el tipo de vacuna, y el estado se deriva de esa fecha.
 - **Reportes:** consultas de apoyo a la gestión diaria.
+- **Seguridad:** contraseñas con bcrypt, permisos por rol validados siempre en el backend, límite de intentos en login y registro, cabeceras de seguridad (helmet) y consultas SQL parametrizadas.
 
 ---
 
@@ -138,7 +154,7 @@ La agenda es general (el turno no reserva veterinario) y la doble reserva de una
 franja se previene con validación en el backend más una restricción única en la
 base de datos.
 
-El detalle completo está en el documento de arquitectura (ver [Documentación](https://github.com/roangelelli/NexoVet/tree/main/docs)).
+El detalle completo está en el [documento de arquitectura](docs/2-arquitectura.md) y en el [informe final](docs/Informe_Final_NexoVet.pdf) (ver [Documentación](#documentación)).
 
 ---
 
@@ -173,38 +189,81 @@ NexoVet/
 ├── .gitignore
 ├── frontend/            Aplicación React (SPA)
 ├── backend/             API REST (Node.js + Express)
-├── database/            Base de datos (esquema y scripts, en la etapa de desarrollo)
-└── docs/                Documentación de diseño
+│   ├── src/             routes, controllers, services, models, middlewares
+│   └── tests/           Pruebas automáticas (node:test)
+├── database/            Esquema (schema.sql) y datos iniciales (seed.sql)
+└── docs/                Documentación del proyecto
+    ├── Informe_Final_NexoVet.pdf
+    └── evidencia/       Resultado de la ejecución de las pruebas automáticas
 ```
 
 ---
 
 ## Documentación
 
-La documentación de diseño se encuentra en la carpeta `docs/`:
+La documentación se encuentra en la carpeta [`docs/`](docs/):
 
-- [Propuesta de proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Propuesta%20NexoVet%20-%20ANGELELLI%20-%20SCHNEIDER.pdf)
-- [Diseño de la base de datos](https://github.com/roangelelli/NexoVet/blob/main/docs/Disen%CC%83o%20BD%20-%20NexoVet.pdf) — diccionario de datos y convenciones.
-- [Diagrama entidad-relación](https://github.com/roangelelli/NexoVet/blob/main/docs/diagrama-er.png)
-- [Arquitectura del proyecto](https://github.com/roangelelli/NexoVet/blob/main/docs/Arquitectura_NexoVet.pdf)
-- [Listado de módulos](https://github.com/roangelelli/NexoVet/blob/main/docs/Listado%20de%20modulos%20-%20NexoVet.pdf)
+- [**Informe final (PDF)**](docs/Informe_Final_NexoVet.pdf) — descripción completa del sistema implementado, pruebas y resultados.
+- [Propuesta de proyecto](docs/1-propuesta-de-proyecto.md) — 1.ª entrega.
+- [Arquitectura del proyecto](docs/2-arquitectura.md)
+- [Diseño de la base de datos](docs/3-diseno-base-de-datos.md) — diccionario de datos y convenciones.
+- [Listado de módulos](docs/4-listado-de-modulos.md) — 2.ª entrega.
+- [Diagrama entidad-relación](docs/diagrama-er.png)
+- [Resultado de las pruebas automáticas](docs/evidencia/resultado-tests.txt)
+
+Además, cada parte del código tiene su propio README: [backend](backend/README.md) (incluye la tabla de endpoints), [frontend](frontend/README.md) y [database](database/README.md).
+
+> Los documentos de las entregas 1 y 2 reflejan el diseño original. Ante cualquier diferencia, el informe final describe el sistema tal como quedó implementado.
 
 ---
 
 ## Instalación y ejecución
 
-> Las instrucciones detalladas se completarán a medida que avance el desarrollo.
-
-**Prerrequisitos previstos:** Node.js (versión a confirmar), npm y acceso a la
-base de datos.
-
-**Pasos generales:**
+**Prerrequisitos:** Node.js 18.11 o superior (se recomienda 20 o más), npm y una base de datos MySQL 8 (la del proyecto está en Aiven, que exige conexión SSL).
 
 1. Clonar el repositorio
    ```bash
    git clone https://github.com/roangelelli/NexoVet.git
    cd NexoVet
    ```
-2. Instalar dependencias en `frontend/` y `backend/`.
-3. Configurar las variables de entorno (archivo `.env`): credenciales de la base de datos (Aiven), claves de Cloudinary y el secreto de JWT. El archivo `.env` **nunca se sube al repositorio**.
-4. Levantar el backend y el frontend.
+2. **Base de datos:** ejecutar `database/schema.sql` y luego `database/seed.sql` (catálogos, horario de ejemplo y usuarios de prueba). Los comandos para Aiven están en [`database/README.md`](database/README.md).
+3. **Backend:**
+   ```bash
+   cd backend
+   npm install
+   cp .env.example .env     # completar los valores (ver abajo)
+   npm run dev              # http://localhost:3000/api/health
+   ```
+4. **Frontend** (en otra terminal):
+   ```bash
+   cd frontend
+   npm install
+   npm run dev              # http://localhost:5173
+   ```
+   Si el backend no corre en `http://localhost:3000`, crear `frontend/.env` con `VITE_API_URL=<url de la API>` (ver `frontend/.env.example`).
+
+**Variables de entorno del backend** (archivo `backend/.env`, que **nunca se sube al repositorio**; la plantilla está en `backend/.env.example`):
+
+| Variable | Para qué sirve |
+|----------|----------------|
+| `PORT` | Puerto de la API (por defecto 3000). |
+| `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Conexión a MySQL. |
+| `DB_SSL_CA_PATH` o `DB_SSL_CA` | Certificado CA de Aiven: ruta al archivo (local) o su contenido (Render). |
+| `JWT_SECRET` | Clave para firmar los tokens de sesión. |
+| `CORS_ORIGIN` | Origen permitido del frontend, **sin barra final** (en local, `http://localhost:5173`). |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Firma de la subida de imágenes. |
+
+**Cuentas de prueba:** los usuarios de ejemplo (uno por rol) que crea `seed.sql` están descriptos en [`database/README.md`](database/README.md).
+
+---
+
+## Pruebas automáticas
+
+El backend incluye pruebas automáticas con el ejecutor nativo de Node (`node:test`). Levantan la API real con modelos en memoria, por lo que **no necesitan base de datos ni variables de entorno**:
+
+```bash
+cd backend
+npm test
+```
+
+Cubren autenticación y autorización por rol, ownership de recursos, el ciclo de vida de los turnos, la disponibilidad y la prevención de doble reserva, las validaciones, el estado de las vacunas y el límite de intentos de login. El resultado de la última ejecución está en [`docs/evidencia/resultado-tests.txt`](docs/evidencia/resultado-tests.txt) y se analiza en el capítulo 6 del informe.
